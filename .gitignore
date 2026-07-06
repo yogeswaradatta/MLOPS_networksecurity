@@ -2,4 +2,3 @@ myvenv
 .env
 Artifacts
 logs
-mlruns
