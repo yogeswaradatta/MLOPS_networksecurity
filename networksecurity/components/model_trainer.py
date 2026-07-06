@@ -19,16 +19,13 @@ from sklearn.ensemble import (
     GradientBoostingClassifier,
     RandomForestClassifier,
 )
-import mlflow
-
-import dagshub
-import os
 import dagshub
 import mlflow
 
 dagshub_token = os.getenv("DAGSHUB_TOKEN")
 
 if dagshub_token:
+    dagshub.auth.add_app_token(dagshub_token)
     os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
