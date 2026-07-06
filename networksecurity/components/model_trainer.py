@@ -22,7 +22,21 @@ from sklearn.ensemble import (
 import mlflow
 
 import dagshub
-dagshub.init(repo_owner='yogeswaradatta', repo_name='MLOPS_networksecurity', mlflow=True)
+import os
+import dagshub
+import mlflow
+
+dagshub_token = os.getenv("DAGSHUB_TOKEN")
+
+if dagshub_token:
+    os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub.init(
+    repo_owner="yogeswaradatta",
+    repo_name="MLOPS_networksecurity",
+    mlflow=True
+)
 
 
 class ModelTrainer:
