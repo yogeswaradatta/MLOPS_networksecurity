@@ -82,27 +82,87 @@ class TrainingPipeline:
         
     def sync_artifact_dir_to_s3(self):
         try:
-            aws_bucket_url = f"s3://{TRAINING_BUCKET_NAME}/artifact/{self.training_pipeline_config.timestamp}"
-            self.s3_sync.sync_folder_to_s3(folder = self.training_pipeline_config.artifact_dir,aws_bucket_url=aws_bucket_url)
+            logging.info("Uploading Artifacts to S3...")
+
+            aws_bucket_url = (
+                f"s3://{TRAINING_BUCKET_NAME}/artifact/{self.training_pipeline_config.timestamp}"
+            )
+
+            logging.info(f"Bucket URL : {aws_bucket_url}")
+
+            self.s3_sync.sync_folder_to_s3(
+            folder=self.training_pipeline_config.artifact_dir,
+            aws_bucket_url=aws_bucket_url
+            )
+
+            logging.info("Artifact Upload Finished.")
+
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e, sys)
          
     def sync_saved_model_dir_to_s3(self):
         try:
-            aws_bucket_url = f"s3://{TRAINING_BUCKET_NAME}/final_models/{self.training_pipeline_config.timestamp}"
-            self.s3_sync.sync_folder_to_s3(folder = self.training_pipeline_config.model_dir,aws_bucket_url=aws_bucket_url)
+            logging.info("Uploading Final Models to S3...")
+
+            aws_bucket_url = (
+                f"s3://{TRAINING_BUCKET_NAME}/final_models/{self.training_pipeline_config.timestamp}"
+            )
+
+            logging.info(f"Bucket URL : {aws_bucket_url}")
+
+            self.s3_sync.sync_folder_to_s3(
+                folder=self.training_pipeline_config.model_dir,
+                aws_bucket_url=aws_bucket_url
+            )
+
+            logging.info("Final Model Upload Finished.")
+
         except Exception as e:
-            raise NetworkSecurityException(e,sys)    
+            raise NetworkSecurityException(e, sys)
         
     def run_pipeline(self):
         try:
-            data_ingestion_artifact=self.start_data_ingestion()
-            data_validation_artifact=self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
-            data_transformation_artifact=self.start_data_transformation(data_validation_artifact=data_validation_artifact)
-            model_trainer_artifact=self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
+            logging.info("=" * 80)
+            logging.info("Training Pipeline Started")
+            logging.info("=" * 80)
+
+            logging.info("Starting Data Ingestion...")
+            data_ingestion_artifact = self.start_data_ingestion()
+            logging.info(f"Data Ingestion Completed\n{data_ingestion_artifact}")
+
+            logging.info("Starting Data Validation...")
+            data_validation_artifact = self.start_data_validation(
+                data_ingestion_artifact=data_ingestion_artifact
+            )
+            logging.info(f"Data Validation Completed\n{data_validation_artifact}")
+
+            logging.info("Starting Data Transformation...")
+            data_transformation_artifact = self.start_data_transformation(
+                data_validation_artifact=data_validation_artifact
+            )
+            logging.info(f"Data Transformation Completed\n{data_transformation_artifact}")
+
+            logging.info("Starting Model Training...")
+            model_trainer_artifact = self.start_model_trainer(
+                data_transformation_artifact=data_transformation_artifact
+            )
+            logging.info(f"Model Training Completed\n{model_trainer_artifact}")
+
+            logging.info("Uploading Artifacts to S3...")
             self.sync_artifact_dir_to_s3()
+            logging.info("Artifacts uploaded successfully.")
+
+            logging.info("Uploading Final Models to S3...")
             self.sync_saved_model_dir_to_s3()
+            logging.info("Final Models uploaded successfully.")
+
+            logging.info("=" * 80)
+            logging.info("Training Pipeline Completed Successfully")
+            logging.info("=" * 80)
+
             return model_trainer_artifact
+
         except Exception as e:
-            raise NetworkSecurityException(e,sys)          
+            logging.exception("Training Pipeline Failed")
+            raise NetworkSecurityException(e, sys)          
         
