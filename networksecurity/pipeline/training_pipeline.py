@@ -164,5 +164,5 @@ class TrainingPipeline:
 
         except Exception as e:
             logging.exception("Training Pipeline Failed")
-            raise NetworkSecurityException(e, sys)          
+            raise NetworkSecurityException(e, sys )          
         
